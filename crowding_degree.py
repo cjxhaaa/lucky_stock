@@ -14,11 +14,8 @@ ts.set_token(tushare_token)
 pro = ts.pro_api()
 
 
-def get_today():
-    return datetime.now().strftime('%Y%m%d')
-
 def crowding_degree():
-    daily_data = pro.daily(trade_date=get_today())
+    daily_data = pro.daily(trade_date=datetime.now().strftime('%Y%m%d'))
     turnover_data = daily_data[['ts_code', 'amount']]
 
     total_turnover = turnover_data['amount'].sum()
@@ -41,11 +38,11 @@ def send_to_dingding():
     hmac_code = hmac.new(secret_enc, string_to_sign_enc, digestmod=hashlib.sha256).digest()
     sign = urllib.parse.quote_plus(base64.b64encode(hmac_code))
     request_url = f"{dingding_webhook}&timestamp={timestamp}&sign={sign}"
-
+    formatted_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     message = {
         "msgtype": "text",
         "text": {
-            "content": "当前股市拥挤度为: " + str(crowding_degree())
+            "content": f"{formatted_date} 股市拥挤度为: {crowding_degree()}"
         }
     }
     headers = {
